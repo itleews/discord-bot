@@ -65,7 +65,7 @@ async def play(ctx, *, query: str):
     if not voice_client:
         voice_client = await channel.connect()
 
-    embed = discord.Embed(title="검색 중", description=f"'{query}' 검색 중...", color=discord.Color.green())
+    embed = discord.Embed(title="검색", description=f"'{query}' 검색 중...", color=discord.Color.green())
     search_message = await ctx.send(embed=embed)
 
     async with ctx.typing():
