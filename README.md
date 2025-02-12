@@ -19,13 +19,16 @@
 
 1. **필수 사항**  
    - Python 3.8 이상 3.13 이하
-   - `discord.py` 및 `yt-dlp` 라이브러리
+   - `discord.py` 및 `yt-dlp`, `PyNaCl` 라이브러리
      ```
      pip install discord.py
      pip install yt-dlp
+     pip install PyNaCl
      ```
    - [ffmpeg 설치](https://ffmpeg.org/download.html)
 
 2. **봇 토근 설정**
    - bot_token.py 파일을 생성하고, token 변수에 디스코드 봇 토큰 넣기
-   ```token = 'YOUR_BOT_TOKEN'```
+   ```
+   token = 'YOUR_BOT_TOKEN'
+   ```

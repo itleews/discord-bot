@@ -37,6 +37,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.data = data
         self.title = data.get('title')
         self.url = data.get('url')
+        self.thumbnail = data.get('thumbnail')  # 썸네일 URL 추가
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -76,6 +77,7 @@ async def play(ctx, *, query: str):
     
     await search_message.delete()
     embed = discord.Embed(title="재생 중", description=f"[{player.title}]({player.url})", color=discord.Color.blue())
+    embed.set_thumbnail(url=player.thumbnail)  # 썸네일 추가
     await ctx.send(embed=embed)
 
 def play_next(ctx):
