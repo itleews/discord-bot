@@ -56,7 +56,10 @@ queue = []
 async def on_message(message):
     if message.author == bot.user:
         return  # 봇이 보낸 메시지에는 반응하지 않음
-    await bot.process_commands(message)
+
+    # 명령어 처리 (여기서만 처리하도록 변경)
+    if message.content.startswith("!"):
+        await bot.process_commands(message)
 
 # 봇이 명령어를 받으면 실행하는 부분
 @bot.command(name="재생")
