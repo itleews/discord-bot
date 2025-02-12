@@ -1,3 +1,2 @@
-# Ignore the yt_token.py file to prevent exposing its values
-yt_token.py
+bot_token.py
 __pycache__
