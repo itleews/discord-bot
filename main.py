@@ -3,7 +3,7 @@ from discord.ext import commands
 import yt_dlp
 import asyncio
 
-from bot_token import token
+from yt_token import token
 
 intents = discord.Intents.default()
 intents.message_content = True  # 메시지 읽기 권한
@@ -51,21 +51,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 queue = []
 
-# on_message 이벤트 핸들러 추가
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return  # 봇이 보낸 메시지에는 반응하지 않음
-
-    # 명령어 처리 (여기서만 처리하도록 변경)
-    if message.content.startswith("!"):
-        await bot.process_commands(message)
-
 # 봇이 명령어를 받으면 실행하는 부분
-@bot.command(name="재생")
+@bot.command(name="실행")
 async def play(ctx, *, query: str):
     if not ctx.message.author.voice:
-        embed = discord.Embed(title="재생 실패", description="먼저 음성 채널에 입장해야 합니다.", color=discord.Color.red())
+        embed = discord.Embed(title="실행 실패", description="먼저 음성 채널에 입장해야 합니다.", color=discord.Color.red())
         await ctx.send(embed=embed)
         return
 
@@ -90,9 +80,8 @@ async def play(ctx, *, query: str):
 
 def play_next(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if queue:  # 대기열이 있으면
-        if not voice_client.is_playing():  # 이미 재생 중이지 않다면
-            voice_client.play(queue.pop(0), after=lambda e: play_next(ctx))
+    if queue:
+        voice_client.play(queue.pop(0), after=lambda e: play_next(ctx))
 
 @bot.command(name="정지")
 async def stop(ctx):
@@ -135,8 +124,8 @@ async def remove(ctx, index: int):
 
 @bot.command(name="명령어")
 async def commands_list(ctx):
-    embed = discord.Embed(title="명령어 리스트", description="""  
-    **!재생 [URL 또는 검색어]** - 음악을 재생합니다.
+    embed = discord.Embed(title="명령어 리스트", description="""
+    **!실행 [URL 또는 검색어]** - 음악을 재생합니다.
     **!정지** - 음악을 멈추고 봇이 음성 채널에서 퇴장합니다.
     **!대기열** - 현재 대기열을 표시합니다.
     **!스킵** - 현재 재생 중인 노래를 스킵합니다.
