@@ -52,10 +52,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
 queue = []
 
 # 봇이 명령어를 받으면 실행하는 부분
-@bot.command(name="실행")
+@bot.command(name="재생")
 async def play(ctx, *, query: str):
     if not ctx.message.author.voice:
-        embed = discord.Embed(title="실행 실패", description="먼저 음성 채널에 입장해야 합니다.", color=discord.Color.red())
+        embed = discord.Embed(title="재생 실패", description="먼저 음성 채널에 입장해야 합니다.", color=discord.Color.red())
         await ctx.send(embed=embed)
         return
 
@@ -125,7 +125,7 @@ async def remove(ctx, index: int):
 @bot.command(name="명령어")
 async def commands_list(ctx):
     embed = discord.Embed(title="명령어 리스트", description="""
-    **!실행 [URL 또는 검색어]** - 음악을 재생합니다.
+    **!재생 [URL 또는 검색어]** - 음악을 재생합니다.
     **!정지** - 음악을 멈추고 봇이 음성 채널에서 퇴장합니다.
     **!대기열** - 현재 대기열을 표시합니다.
     **!스킵** - 현재 재생 중인 노래를 스킵합니다.
