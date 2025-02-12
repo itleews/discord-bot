@@ -3,7 +3,7 @@ from discord.ext import commands
 import yt_dlp
 import asyncio
 
-from yt_token import token
+from bot_token import token
 
 intents = discord.Intents.default()
 intents.message_content = True  # 메시지 읽기 권한
