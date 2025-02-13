@@ -6,8 +6,6 @@ class InfoCommand(commands.Cog):
         self.bot = bot
 
     @commands.command(name="정보")
-    @commands.command(name="명령어")
-    @commands.command(name="도움말")
     async def info(self, ctx):
         embed = discord.Embed(
             title="⭐ 춘식이 정보",
