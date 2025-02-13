@@ -18,8 +18,8 @@
 ## 설치
 
 1. **필수 사항**  
-   - Python 3.8 이상 3.13 이하
-   - `discord.py` 및 `yt-dlp`, `PyNaCl` 라이브러리
+   - Python 3.8 이상 3.12 이하
+   - `discord.py` 및 `yt-dlp`, `PyNaCl` 라이브러리 설치
      ```
      pip install discord.py
      pip install yt-dlp
