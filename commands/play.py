@@ -60,7 +60,7 @@ def play_next(ctx):
         formatted_duration = f"{hours:02}:{minutes:02}:{seconds:02}" if hours else f"{minutes:02}:{seconds:02}"
 
         # 대기열 형식
-        queue_info = '지금 재생' if not queue else str(len(queue))
+        queue_info = '없음' if not queue else str(len(queue))
 
         # 재생한 사람 정보 추가
         played_by = ctx.message.author  # 재생한 사람의 이름
@@ -71,8 +71,8 @@ def play_next(ctx):
             color=discord.Color.blue()
         )
         embed.add_field(name="재생 시간", value=formatted_duration, inline=True)
-        embed.add_field(name="대기열", value=queue_info, inline=True)
         embed.add_field(name="영상", value=f"[링크]({current_player.url})", inline=True)
+        embed.add_field(name="남은 대기열", value=queue_info, inline=True)
         embed.set_thumbnail(url=current_player.thumbnail)  # 이미지 크기를 작게 표시
         embed.set_author(name=f"{played_by.name}", icon_url=played_by.avatar.url)  # 작성자 정보 추가
 
