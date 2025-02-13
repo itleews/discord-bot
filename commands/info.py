@@ -24,7 +24,7 @@ class InfoCommand(commands.Cog):
                         value="재생을 중지하고 봇이 음성 채널에서 퇴장해요. 대기열에 있는 노래들도 전부 삭제돼요.", inline=False)
         embed.add_field(name="⏯ **!일시정지 / !재개 / !다음**", 
                         value="현재 재생 중인 음악을 일시 정지하거나 다시 재생하며, 다음 곡으로 넘길 수도 있어요.", inline=False)
-        embed.add_field(name="🎵 **!현재재생**", 
+        embed.add_field(name="🎵 **!현재노래**", 
                         value="현재 재생 중인 음악 정보를 확인할 수 있어요.", inline=False)
         embed.add_field(name="📜 **!대기열**", 
                         value="대기열에 있는 음악 목록을 표시해요.", inline=False)
