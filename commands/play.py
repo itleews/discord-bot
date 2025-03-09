@@ -16,8 +16,10 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0'  # ipv6로 인한 문제 방지
+    'source_address': '0.0.0.0',  # ipv6로 인한 문제 방지
+    'proxy': 'http://localhost:5000'  # 프록시 서버 설정
 }
+
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
