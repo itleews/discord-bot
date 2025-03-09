@@ -17,7 +17,6 @@ ytdl_format_options = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6로 인한 문제 방지
-    'proxy': 'http://localhost:5000'  # 프록시 서버 설정
 }
 
 
