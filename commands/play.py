@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 import asyncio
-from youtube_api import get_video_url  # 유튜브 API에서 비디오 URL 가져오기
-import youtube_dl  # youtube-dl 라이브러리 사용
+from youtube_api import search_youtube  # 유튜브 검색 함수 사용
+from yt_dlp_source import YTDLSource
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -protocol_whitelist file,http,https,tcp,tls,crypto',
@@ -84,30 +84,28 @@ class PlayCommand(commands.Cog):
 
         async with ctx.typing():
             try:
-                # 유튜브 URL 가져오기
-                video_url = get_video_url(query)
-                print(f"비디오 URL: {video_url}")
+                # 유튜브 검색 결과 가져오기
+                search_result = search_youtube(query)
+                if search_result is None:
+                    embed = discord.Embed(title="❗오류", description="검색 결과가 없어요.", color=discord.Color.red())
+                    await ctx.send(embed=embed)
+                    return
 
-                # youtube-dl로 비디오 스트리밍을 위한 설정
-                ydl_opts = {
-                    'format': 'bestaudio/best',
-                    'postprocessors': [{
-                        'key': 'FFmpegAudio',
-                        'preferredcodec': 'mp3',
-                        'preferredquality': '192',
-                    }],
-                    'outtmpl': 'downloads/%(id)s.%(ext)s',
-                    'quiet': True,
-                }
+                # 비디오 URL, 제목, 썸네일 정보 가져오기
+                video_url = search_result["url"]
+                video_title = search_result["title"]
+                video_thumbnail = search_result["thumbnail"]
 
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                    info_dict = ydl.extract_info(video_url, download=False)
-                    url2 = info_dict['formats'][0]['url']
+                # 플레이어 추가
+                player = await asyncio.wait_for(YTDLSource.from_url(video_url, loop=ctx.bot.loop, stream=True), timeout=10.0)
+                queue.append(player)
 
-                # 음성을 재생
-                voice_client.play(discord.FFmpegPCMAudio(url2, **ffmpeg_options), after=lambda e: play_next(ctx))
-
-                print(f"'{query}' 재생 시작")
+                if not voice_client.is_playing():
+                    # 큐에서 첫 번째 곡을 꺼내고 재생
+                    global current_player
+                    current_player = queue.pop(0)
+                    voice_client.play(current_player, after=lambda e: play_next(ctx))
+                    print(f"'{video_title}' 재생 시작")
             except asyncio.TimeoutError:
                 print("유튜브 검색 시간이 초과되었습니다.")
                 embed = discord.Embed(title="❗오류", description="유튜브 검색 시간을 초과했어요.", color=discord.Color.red())
@@ -120,6 +118,33 @@ class PlayCommand(commands.Cog):
                 return
         
         await search_message.delete()
+
+        # 곡 길이 가져오기
+        duration_seconds = player.info['duration']
+        minutes, seconds = divmod(duration_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        formatted_duration = f"{hours:02}:{minutes:02}:{seconds:02}" if hours else f"{minutes:02}:{seconds:02}"
+
+        # 대기열 형식
+        queue_info = '지금 재생' if not queue else str(len(queue))
+
+        # 재생한 사람 정보 추가
+        played_by = ctx.message.author
+
+        # 테이블 형식으로 정보 정리
+        embed = discord.Embed(
+            title=f"🎵 {video_title}",
+            color=discord.Color.blue()
+        )
+        embed.add_field(name="재생 시간", value=formatted_duration, inline=True)
+        embed.add_field(name="대기열", value=queue_info, inline=True)
+        embed.add_field(name="영상", value=f"[링크]({video_url})", inline=True) 
+        embed.set_thumbnail(url=video_thumbnail)  # 이미지 크기를 작게 표시
+        embed.set_author(name=f"{played_by.name}", icon_url=played_by.avatar.url)  # 작성자 정보 추가
+        if queue_info != '지금 재생':
+            embed.set_footer(text="➕ 대기열에 곡을 추가했어요.")
+
+        self.current_message = await ctx.send(embed=embed)
 
     @commands.command(name="현재노래")
     async def now_playing(self, ctx):
