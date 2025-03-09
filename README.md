@@ -19,7 +19,7 @@
 
 1. **필수 사항**  
    - Python 3.8 이상 3.12 이하
-   - `discord.py` 및 `google-api-python-client`, PyNaCl` 등 라이브러리 설치
+   - `discord.py` 및 `google-api-python-client`, `yt_dlp` 등 라이브러리 설치
      ```
      pip install -r requirements.txt
      ```
