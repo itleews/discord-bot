@@ -56,5 +56,5 @@ def play_next(ctx):
         voice_client.play(player, after=lambda e: play_next(ctx))
 
 # setup 함수 추가
-def setup(bot):
-    bot.add_cog(PlayCommand(bot))
+async def setup(bot):
+    await bot.add_cog(PlayCommand(bot))
