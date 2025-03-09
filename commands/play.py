@@ -1,8 +1,11 @@
+import os
 import discord
 from discord.ext import commands
 import yt_dlp
 import asyncio
 from .queue_manager import queue, current_player
+
+cookies_path = os.getenv('YT_DLP_COOKIES')
 
 # 유튜브 DL 옵션
 ytdl_format_options = {
@@ -17,8 +20,8 @@ ytdl_format_options = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6로 인한 문제 방지
+    'cookies': cookies_path  # 환경 변수에서 가져온 쿠키 경로 사용
 }
-
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
