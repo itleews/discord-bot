@@ -1,11 +1,8 @@
-import os
 import discord
 from discord.ext import commands
-import yt_dlp
 import asyncio
+import subprocess
 from .queue_manager import queue, current_player
-
-cookies_path = os.getenv('YT_DLP_COOKIES')
 
 # 유튜브 DL 옵션
 ytdl_format_options = {
@@ -20,15 +17,13 @@ ytdl_format_options = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6로 인한 문제 방지
-    'cookies': cookies_path  # 환경 변수에서 가져온 쿠키 경로 사용
+    'cookies': '/home/leews_it/discord-bot/cookies.txt'  # 환경 변수에서 가져온 쿠키 경로 사용
 }
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
 }
-
-ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -42,13 +37,45 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(None, lambda: run_ytdlp_command(url, stream))
 
         if 'entries' in data:
             data = data['entries'][0]
 
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
+        filename = data['url'] if stream else data['filepath']
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+def run_ytdlp_command(query, stream=False):
+    """yt-dlp 명령어를 직접 실행하여 데이터를 반환"""
+    command = [
+        'yt-dlp',
+        '--cookies', '/home/leews_it/discord-bot/cookies.txt',
+        '--quiet', '--no-warnings', '--extractor-retries', '3', '--max-downloads', '1'
+    ]
+
+    if stream:
+        command.append('-f')
+        command.append('bestaudio/best')  # 오디오 스트리밍을 위해 'bestaudio' 선택
+
+    command.append(f"ytsearch:{query}")  # 유튜브 검색 쿼리
+
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        raise Exception("yt-dlp 명령어 실행 실패")
+
+    # 결과에서 JSON 파싱
+    output = result.stdout
+    return parse_ytdlp_output(output)
+
+def parse_ytdlp_output(output):
+    """yt-dlp 출력에서 JSON 파싱"""
+    import json
+    try:
+        data = json.loads(output)
+        return data
+    except json.JSONDecodeError:
+        raise Exception("yt-dlp 출력에서 JSON 파싱 실패")
 
 def play_next(ctx):
     global current_player
@@ -120,7 +147,7 @@ class PlayCommand(commands.Cog):
 
         async with ctx.typing():
             try:
-                player = await asyncio.wait_for(YTDLSource.from_url(f"ytsearch:{query}", loop=ctx.bot.loop, stream=True), timeout=10.0)
+                player = await asyncio.wait_for(YTDLSource.from_url(query, loop=ctx.bot.loop, stream=True), timeout=10.0)
                 queue.append(player)
 
                 if not voice_client.is_playing():
