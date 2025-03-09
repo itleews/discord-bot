@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
+import yt_dlp
 import asyncio
-import subprocess
 from .queue_manager import queue, current_player
 
 # 유튜브 DL 옵션
@@ -17,13 +17,14 @@ ytdl_format_options = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6로 인한 문제 방지
-    'cookies': '/home/leews_it/discord-bot/cookies.txt'  # 환경 변수에서 가져온 쿠키 경로 사용
 }
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
 }
+
+ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -37,45 +38,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: run_ytdlp_command(url, stream))
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
 
         if 'entries' in data:
             data = data['entries'][0]
 
-        filename = data['url'] if stream else data['filepath']
+        filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-def run_ytdlp_command(query, stream=False):
-    """yt-dlp 명령어를 직접 실행하여 데이터를 반환"""
-    command = [
-        'yt-dlp',
-        '--cookies', '/home/leews_it/discord-bot/cookies.txt',
-        '--quiet', '--no-warnings', '--extractor-retries', '3', '--max-downloads', '1'
-    ]
-
-    if stream:
-        command.append('-f')
-        command.append('bestaudio/best')  # 오디오 스트리밍을 위해 'bestaudio' 선택
-
-    command.append(f"ytsearch:{query}")  # 유튜브 검색 쿼리
-
-    result = subprocess.run(command, capture_output=True, text=True)
-
-    if result.returncode != 0:
-        raise Exception("yt-dlp 명령어 실행 실패")
-
-    # 결과에서 JSON 파싱
-    output = result.stdout
-    return parse_ytdlp_output(output)
-
-def parse_ytdlp_output(output):
-    """yt-dlp 출력에서 JSON 파싱"""
-    import json
-    try:
-        data = json.loads(output)
-        return data
-    except json.JSONDecodeError:
-        raise Exception("yt-dlp 출력에서 JSON 파싱 실패")
 
 def play_next(ctx):
     global current_player
@@ -138,16 +107,16 @@ class PlayCommand(commands.Cog):
                 await ctx.send(embed=embed)
                 return
 
-        # 유튜브 검색 및 재생
+        # 사운드클라우드 검색 및 재생
         searched_by = ctx.message.author
-        embed = discord.Embed(title="🔍 유튜브 검색 중...", color=discord.Color.green())
+        embed = discord.Embed(title="🔍 사운드클라우드 검색 중...", color=discord.Color.green())
         embed.add_field(name=query, value="노래를 검색 중이에요.", inline=False)
         embed.set_author(name=f"{searched_by.name}", icon_url=searched_by.avatar.url)
         search_message = await ctx.send(embed=embed)
 
         async with ctx.typing():
             try:
-                player = await asyncio.wait_for(YTDLSource.from_url(query, loop=ctx.bot.loop, stream=True), timeout=10.0)
+                player = await asyncio.wait_for(YTDLSource.from_url(f"scsearch:{query}", loop=ctx.bot.loop, stream=True), timeout=10.0)
                 queue.append(player)
 
                 if not voice_client.is_playing():
@@ -157,12 +126,12 @@ class PlayCommand(commands.Cog):
                     voice_client.play(current_player, after=lambda e: play_next(ctx))
                     print(f"'{player.title}' 재생 시작")
             except asyncio.TimeoutError:
-                print("유튜브 검색 시간이 초과되었습니다.")
-                embed = discord.Embed(title="❗오류", description="유튜브 검색 시간을 초과했어요.", color=discord.Color.red())
+                print("사운드클라우드 검색 시간이 초과되었습니다.")
+                embed = discord.Embed(title="❗오류", description="사운드클라우드 검색 시간을 초과했어요.", color=discord.Color.red())
                 await ctx.send(embed=embed)
                 return
             except Exception as e:
-                print(f"유튜브 검색 또는 재생 중 오류 발생: {e}")
+                print(f"사운드클라우드 검색 또는 재생 중 오류 발생: {e}")
                 embed = discord.Embed(title="❗오류", description="곡을 검색하거나 재생하는데 실패했어요.", color=discord.Color.red())
                 await ctx.send(embed=embed)
                 return
