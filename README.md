@@ -19,18 +19,17 @@
 
 1. **필수 사항**  
    - Python 3.8 이상 3.12 이하
-   - `discord.py` 및 `yt-dlp`, `PyNaCl` 라이브러리 설치
+   - `discord.py` 및 `google-api-python-client`, PyNaCl` 등 라이브러리 설치
      ```
-     pip install discord.py
-     pip install yt-dlp
-     pip install PyNaCl
+     pip install -r requirements.txt
      ```
    - [ffmpeg 설치](https://ffmpeg.org/download.html)
 
-2. **봇 토근 설정**
-   - bot_token.py 파일을 생성하고, token 변수에 디스코드 봇 토큰 넣기
+2. **환경 변수 설정**
+   - .env 파일을 생성하고, 디스코드 봇 토큰과 YouTube Data API v3 Key 넣기
    ```
-   token = 'YOUR_BOT_TOKEN'
+   DISCORD_TOKEN = 'YOUR_BOT_TOKEN'
+   YOUTUBE_API_KEY = 'YOUR_API_KEY'
    ```
 
 3. **봇 실행**

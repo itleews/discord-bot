@@ -2,7 +2,11 @@ import discord
 from discord.ext import commands
 import os
 import asyncio
-from bot_token import token
+from dotenv import load_dotenv  # API 키 보안 관리
+
+# 환경 변수 로드
+load_dotenv()
+token = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
 intents.messages = True
