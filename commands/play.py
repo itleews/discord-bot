@@ -1,7 +1,6 @@
-import discord
 from discord.ext import commands
-from youtube_api import search_youtube  # YouTube API로 비디오 정보 가져오기
-import asyncio
+from youtube_api import search_youtube  # 유튜브 API로 비디오 정보 가져오기
+import discord
 
 queue = []
 
@@ -55,3 +54,7 @@ def play_next(ctx):
         player = queue.pop(0)
         voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
         voice_client.play(player, after=lambda e: play_next(ctx))
+
+# setup 함수 추가
+def setup(bot):
+    bot.add_cog(PlayCommand(bot))
