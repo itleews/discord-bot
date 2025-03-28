@@ -108,7 +108,7 @@ def play_next(ctx):
 
         asyncio.run_coroutine_threadsafe(ctx.send(embed=embed), ctx.bot.loop)
 
-class PlayCommand(commands.Cog):
+class YPlayCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.current_player = None
@@ -196,4 +196,4 @@ class PlayCommand(commands.Cog):
         self.current_message = await ctx.send(embed=embed)
 
 async def setup(bot):
-    await bot.add_cog(PlayCommand(bot))
+    await bot.add_cog(YPlayCommand(bot))
